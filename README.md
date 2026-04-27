@@ -16,7 +16,6 @@ This project focuses on enhancing a dataset by adding **Latitude** and **Longitu
 ## 🛠️ Tech Stack
 - Python
 - Pandas
-- Geopy
 
 ---
 
