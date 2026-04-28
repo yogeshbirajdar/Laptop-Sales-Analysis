@@ -1,5 +1,5 @@
 # ================================
-# Laptop Sales Analysis Dashboard (FINAL UI + MAP FIXED)
+# Laptop Sales Analysis Dashboard (FINAL UI + ALL FEATURES)
 # ================================
 
 import pandas as pd
@@ -16,7 +16,7 @@ st.set_page_config(page_title="Laptop Sales Analysis", page_icon="💻", layout=
 st.title("💻 Laptop Sales Analysis Dashboard")
 
 # -------------------------------
-# Background Image (Local)
+# Background Image
 # -------------------------------
 with open("background_image.jpg", "rb") as f:
     img_base64 = base64.b64encode(f.read()).decode()
@@ -98,7 +98,7 @@ k3.markdown(f"<div class='kpi-card'><h3>Total Quantity</h3><h2>{format_number(to
 st.divider()
 
 # -------------------------------
-# Charts
+# Brand + Monthly Charts
 # -------------------------------
 col1, col2 = st.columns(2)
 
@@ -111,6 +111,13 @@ with col1:
     fig1.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color='white')
     st.plotly_chart(fig1, use_container_width=True)
 
+    v1, d1 = st.columns(2)
+    with v1:
+        with st.expander("View Data"):
+            st.dataframe(brand_df)
+    with d1:
+        st.download_button("Download", brand_df.to_csv(index=False), "brand_sales.csv")
+
 with col2:
     st.subheader("📈 Monthly Sales Trend")
     filtered_df["Month"] = pd.to_datetime(filtered_df["Month"])
@@ -119,6 +126,13 @@ with col2:
     fig2 = px.line(trend, x="Month", y="Sales", markers=True)
     fig2.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color='white')
     st.plotly_chart(fig2, use_container_width=True)
+
+    v2, d2 = st.columns(2)
+    with v2:
+        with st.expander("View Data"):
+            st.dataframe(trend)
+    with d2:
+        st.download_button("Download", trend.to_csv(index=False), "monthly_sales.csv")
 
 st.divider()
 
@@ -137,6 +151,10 @@ with c1:
     fig3.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color='white')
     st.plotly_chart(fig3, use_container_width=True)
 
+    with st.expander("View Data"):
+        st.dataframe(pie_df)
+    st.download_button("Download", pie_df.to_csv(index=False), "region_sales.csv")
+
 with c2:
     st.subheader("🍩 Region Wise Quantity")
     fig4 = px.pie(donut_df, values="Quantity_Sold", names="Region", hole=0.5)
@@ -144,6 +162,77 @@ with c2:
     fig4.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color='white')
     st.plotly_chart(fig4, use_container_width=True)
 
+    with st.expander("View Data"):
+        st.dataframe(donut_df)
+    st.download_button("Download", donut_df.to_csv(index=False), "region_qty.csv")
+
+st.divider()
+
+# -------------------------------
+# Inward & Dispatch
+# -------------------------------
+c3, c4 = st.columns(2)
+
+with c3:
+    st.subheader("📦 Inward Date Sales Trend (Brand-wise)")
+    filtered_df["Inward_Date"] = pd.to_datetime(filtered_df["Inward_Date"])
+    inward = filtered_df.groupby([filtered_df["Inward_Date"].dt.to_period("M"), "Brand"])["Sales"].sum().reset_index()
+    inward["Inward_Date"] = inward["Inward_Date"].astype(str)
+
+    fig5 = px.line(inward, x="Inward_Date", y="Sales", color="Brand", markers=True)
+    fig5.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color='white')
+    st.plotly_chart(fig5, use_container_width=True)
+
+    with st.expander("View Data"):
+        st.dataframe(inward)
+    st.download_button("Download", inward.to_csv(index=False), "inward.csv")
+
+with c4:
+    st.subheader("🚚 Dispatch Date Sales Trend (Brand-wise)")
+    filtered_df["Dispatch_Date"] = pd.to_datetime(filtered_df["Dispatch_Date"])
+    dispatch = filtered_df.groupby([filtered_df["Dispatch_Date"].dt.to_period("M"), "Brand"])["Sales"].sum().reset_index()
+    dispatch["Dispatch_Date"] = dispatch["Dispatch_Date"].astype(str)
+
+    fig6 = px.line(dispatch, x="Dispatch_Date", y="Sales", color="Brand", markers=True)
+    fig6.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color='white')
+    st.plotly_chart(fig6, use_container_width=True)
+
+    with st.expander("View Data"):
+        st.dataframe(dispatch)
+    st.download_button("Download", dispatch.to_csv(index=False), "dispatch.csv")
+
+st.divider()
+
+# -------------------------------
+# Core & Processor
+# -------------------------------
+col_1, col_2 = st.columns(2)
+
+with col_1:
+    st.subheader("💻 Core Specification Sales")
+    core_df = filtered_df.groupby("Core_Specification")["Sales"].sum().reset_index()
+    core_df["label"] = core_df["Sales"].apply(format_number)
+
+    fig7 = px.bar(core_df, x="Core_Specification", y="Sales", text="label")
+    fig7.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color='white')
+    st.plotly_chart(fig7, use_container_width=True)
+
+    with st.expander("View Data"):
+        st.dataframe(core_df)
+    st.download_button("Download", core_df.to_csv(index=False), "core.csv")
+
+with col_2:
+    st.subheader("⚙️ Processor Specification Sales")
+    proc_df = filtered_df.groupby("Processor_Specification")["Sales"].sum().reset_index()
+    proc_df["label"] = proc_df["Sales"].apply(format_number)
+
+    fig8 = px.bar(proc_df, x="Processor_Specification", y="Sales", text="label")
+    fig8.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font_color='white')
+    st.plotly_chart(fig8, use_container_width=True)
+
+    with st.expander("View Data"):
+        st.dataframe(proc_df)
+    st.download_button("Download", proc_df.to_csv(index=False), "processor.csv")
 
 st.divider()
 
